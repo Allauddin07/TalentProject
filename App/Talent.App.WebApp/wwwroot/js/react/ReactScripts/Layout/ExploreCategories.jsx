@@ -6,7 +6,7 @@ export class ExploreCategories extends React.Component {
             <section className="explore">
                 <div className="ui container">
                     <div className="row-padded">
-                        <h3 className="mainpage-heading">Explore categories></h3>
+                        <h3 className="mainpage-heading">Explore categories</h3>
                         <p className="mainpage-paragraph">Look for people to trade skills with</p>
                     </div>
                     <div className="row-padded">

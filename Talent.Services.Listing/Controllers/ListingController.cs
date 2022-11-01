@@ -223,6 +223,7 @@ namespace Talent.Services.Listing.Controllers
         {
             try
             {
+               
                 //userId is either Employer or Recruiter
                 string userId = (await _jobService.GetJobByIDAsync(id)).EmployerID;
                 

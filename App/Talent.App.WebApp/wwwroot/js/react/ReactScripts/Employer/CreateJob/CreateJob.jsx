@@ -46,6 +46,8 @@ export default class CreateJob extends React.Component {
         this.init = this.init.bind(this);
     };
 
+   
+
     init() {
         let loaderData = this.state.loaderData;
         loaderData.allowedUsers.push("Employer");
@@ -94,7 +96,7 @@ export default class CreateJob extends React.Component {
         }       
     }
     addUpdateJob() {
-        var jobData = this.state.jobData;
+        var jobData = this.state.jobData; 
         console.log("data to save:", jobData);
         //jobData.jobDetails.startDate = jobData.jobDetails.startDate.toDate();
         console.log("date:", jobData.jobDetails.startDate);
@@ -127,10 +129,16 @@ export default class CreateJob extends React.Component {
         this.setState({
             jobData:data
         })
+
         console.log(data);
     }
    
     render() {
+
+       console.log(this.props.match)
+       
+        
+        
         return (
             <BodyWrapper reload={this.init} loaderData={this.state.loaderData}>
                 <section className="page-body">

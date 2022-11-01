@@ -185,6 +185,7 @@ export class JobDetailsCard extends React.Component {
                                 <div className="content">
                                     <div className="summary">
                                         <button type="button" className="fluid ui teal button" onClick={this.props.createClick}>Save</button>
+                                        
                                     </div>
                                 </div>
                             </div>
