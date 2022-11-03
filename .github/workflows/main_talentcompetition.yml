@@ -53,5 +53,5 @@ jobs:
         with:
           app-name: 'TalentCompetition'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_96CE1B9FD318472F9F7B5474F790C17D }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_A8478E3B18D94100BE3F833FBC73E01A }}
           package: .
