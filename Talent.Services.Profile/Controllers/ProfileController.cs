@@ -20,6 +20,8 @@ using MongoDB.Driver;
 using Talent.Services.Profile.Domain.Contracts;
 using Talent.Common.Aws;
 using Talent.Services.Profile.Models;
+using Talent.Services.Profile.Domain.Services;
+using System.Data;
 
 namespace Talent.Services.Profile.Controllers
 {
@@ -36,6 +38,7 @@ namespace Talent.Services.Profile.Controllers
         private readonly IRepository<UserDescription> _personDescriptionRespository;
         private readonly IRepository<UserAvailability> _userAvailabilityRepository;
         private readonly IRepository<UserSkill> _userSkillRepository;
+
         private readonly IRepository<UserEducation> _userEducationRepository;
         private readonly IRepository<UserCertification> _userCertificationRepository;
         private readonly IRepository<UserLocation> _userLocationRepository;
@@ -45,6 +48,8 @@ namespace Talent.Services.Profile.Controllers
         private readonly IRepository<Recruiter> _recruiterRepository;
         private readonly IAwsService _awsService;
         private readonly string _profileImageFolder;
+
+        private readonly IRepository<UserExperience> _userExperienceRepository;
 
         public ProfileController(IBusClient busClient,
             IProfileService profileService,
@@ -62,7 +67,8 @@ namespace Talent.Services.Profile.Controllers
             IRepository<Recruiter> recruiterRepository,
             IHostingEnvironment environment,
             IAwsService awsService,
-            IUserAppContext userAppContext)
+            IUserAppContext userAppContext,
+            IRepository<UserExperience> userExperienceRepository)    
         {
             _busClient = busClient;
             _profileService = profileService;
@@ -82,6 +88,7 @@ namespace Talent.Services.Profile.Controllers
             _environment = environment;
             _profileImageFolder = "images\\";
             _awsService = awsService;
+            _userExperienceRepository = userExperienceRepository;
         }
 
         #region Talent
@@ -143,10 +150,31 @@ namespace Talent.Services.Profile.Controllers
 
         [HttpPost("addLanguage")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "talent")]
-        public ActionResult AddLanguage([FromBody] AddLanguageViewModel language)
+        public async Task<ActionResult> AddLanguage([FromBody] AddLanguageViewModel language)
         {
+
+            if (ModelState.IsValid)
+            {
+               var id= _userAppContext.CurrentUserId;
+                language.CurrentUserId=id;
+              var value= await _profileService.AddNewLanguage(language);
+                if (value)
+                {
+                    return Json(new { Success = true, message = "Added successfully" });
+                }
+                else
+                {
+                    return Json(new { Success =false, message = "Something went wrong" });
+
+                }
+
+            }
+            else
+            {
+                return Json(new { Success = false, message = "Something went wrong" });
+            }
             //Your code here;
-            throw new NotImplementedException();
+            
         }
 
         [HttpPost("updateLanguage")]
@@ -154,7 +182,35 @@ namespace Talent.Services.Profile.Controllers
         public async Task<ActionResult> UpdateLanguage([FromBody] AddLanguageViewModel language)
         {
             //Your code here;
-            throw new NotImplementedException();
+            try
+            {
+                if (language != null)
+                {
+
+                    var data = new UserLanguage()
+                    {
+                        Id = language.Id,
+                        UserId = language.CurrentUserId,
+                        Language = language.Name,
+                        LanguageLevel = language.Level,
+
+
+                    };
+
+                    await _userLanguageRepository.Update(data);
+                    return Json(new { Success = true });
+                }
+                else
+                {
+                    return Json(new { Success = false });
+                }
+
+            }
+            catch (Exception ex)
+            {
+
+                return Json(new { Success = false });
+            }
         }
 
         [HttpPost("deleteLanguage")]
@@ -162,7 +218,37 @@ namespace Talent.Services.Profile.Controllers
         public async Task<ActionResult> DeleteLanguage([FromBody] AddLanguageViewModel language)
         {
             //Your code here;
-            throw new NotImplementedException();
+            try {
+                if (language != null)
+                {
+
+                    var data = new UserLanguage()
+                    {
+                        Id = language.Id,
+                        UserId = language.CurrentUserId,
+                        Language = language.Name,
+                        LanguageLevel = language.Level,
+
+
+                    };
+
+                    await _userLanguageRepository.Delete(data);
+                    return Json(new { Success = true });
+                }
+                else
+                {
+                    return Json(new { Success = false});
+                }
+
+            }
+            catch (Exception ex) {
+
+                return Json(new { Success = false });
+            }
+           
+            
+           
+           
         }
 
         [HttpGet("getSkill")]
@@ -170,15 +256,46 @@ namespace Talent.Services.Profile.Controllers
         public async Task<IActionResult> GetSkills()
         {
             //Your code here;
-            throw new NotImplementedException();
+          var data=  await _userSkillRepository.FindAsync((x) => x.UserId == _userAppContext.CurrentUserId);
+            return Json(data);  
         }
 
         [HttpPost("addSkill")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "talent")]
-        public ActionResult AddSkill([FromBody]AddSkillViewModel skill)
+        public async Task<ActionResult> AddSkill([FromBody]AddSkillViewModel skill)
         {
-            //Your code here;
-            throw new NotImplementedException();
+            try {
+
+                //Your code here;
+                if (ModelState.IsValid)
+                {
+                    var id = _userAppContext.CurrentUserId;
+                    // skill.CurrentUserId = id;
+                    var data = new UserSkill()
+                    {
+                        Skill = skill.Name,
+                        ExperienceLevel = skill.Level,
+                        UserId = id
+
+
+                    };
+                    await _userSkillRepository.Add(data);
+
+                    return Json(new { Success = true, message = "Added successfully" });
+
+                }
+                else
+                {
+                    return Json(new { Success = false, message = "Something went wrong" });
+                }
+
+
+            }
+            catch (Exception ex) {
+                return Json(new { Success = false, message = "Something went wrong" });
+
+            }
+            
         }
 
         [HttpPost("updateSkill")]
@@ -186,19 +303,216 @@ namespace Talent.Services.Profile.Controllers
         public async Task<IActionResult> UpdateSkill([FromBody]AddSkillViewModel skill)
         {
             //Your code here;
-            throw new NotImplementedException();
+            try
+            {
+                if (skill != null)
+                {
+
+                    var data = new UserSkill()
+                    {
+                        Id = skill.Id,
+                        UserId = _userAppContext.CurrentUserId,
+                        Skill = skill.Name,
+                        ExperienceLevel = skill.Level,
+
+
+                    };
+
+                    await _userSkillRepository.Update(data);
+                    return Json(new { Success = true });
+                }
+                else
+                {
+                    return Json(new { Success = false });
+                }
+
+            }
+            catch (Exception ex)
+            {
+
+                return Json(new { Success = false });
+            }
         }
 
         [HttpPost("deleteSkill")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "talent")]
-        public async Task<IActionResult> DeleteSkill([FromBody]AddSkillViewModel skill)
+        public async Task<IActionResult> DeleteSkill([FromBody] AddSkillViewModel skill)
         {
             //Your code here;
-            throw new NotImplementedException();
+            try
+            {
+                if (skill != null)
+                {
+
+                    var data = new UserSkill()
+                    {
+                        Id = skill.Id,
+                        Skill = skill.Name,
+                        ExperienceLevel = skill.Level,
+                        UserId = _userAppContext.CurrentUserId
+
+
+
+
+                    };
+
+                    await _userSkillRepository.Delete(data);
+                    return Json(new { Success = true });
+                }
+                else
+                {
+                    return Json(new { Success = false });
+                }
+
+            }
+            catch (Exception ex)
+            {
+
+                return Json(new { Success = false });
+            } 
         }
+
+
+        [HttpPost("addExperience")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "talent")]
+        public async Task<ActionResult> AddExperience([FromBody] ExperienceViewModel experience)
+        {
+            try
+            {
+               
+                //Your code here;
+                if (ModelState.IsValid)
+                {
+                    var id = _userAppContext.CurrentUserId;
+                    var t = experience.End;
+                   
+                    
+                    
+                    // skill.CurrentUserId = id;
+                    var data = new UserExperience()
+                    {
+                       Company=experience.Company,  
+                       Position=experience.Position,
+                       Responsibilities=experience.Responsibilities,
+                       UserId=id,
+                       Start=experience.Start,  
+                       End=experience.End,
+
+                    };
+                    await _userExperienceRepository.Add(data);
+
+                    return Json(new { Success = true, message = "Added successfully" });
+
+                }
+                else
+                {
+                    return Json(new { Success = false, message = "Something went wrong" });
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                return Json(new { Success = false, message = "Something went wrong" });
+
+            }
+
+        }
+
+
+        [HttpPost("updateExperience")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "talent")]
+        public async Task<ActionResult> UpdateExperience([FromBody] ExperienceViewModel experience)
+        {
+            try
+            {
+
+                //Your code here;
+                if (experience!=null)
+                {
+                    var id = _userAppContext.CurrentUserId;
+                    // skill.CurrentUserId = id;
+                    var data = new UserExperience()
+                    {
+                        Id=experience.Id,
+                        Company = experience.Company,
+                        Position = experience.Position,
+                        Responsibilities = experience.Responsibilities,
+                        UserId = id,
+                        Start = experience.Start,
+                        End = experience.End,
+
+                    };
+                    await _userExperienceRepository.Update(data);
+
+                    return Json(new { Success = true, message = "updated successfully" });
+
+                }
+                else
+                {
+                    return Json(new { Success = false, message = "Something went wrong" });
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                return Json(new { Success = false, message = "Something went wrong" });
+
+            }
+
+        }
+
+
+        [HttpPost("deleteExperience")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "talent")]
+        public async Task<ActionResult> DeleteExperience([FromBody] ExperienceViewModel experience)
+        {
+            try
+            {
+
+                //Your code here;
+                if (experience != null)
+                {
+                    var id = _userAppContext.CurrentUserId;
+                    // skill.CurrentUserId = id;
+                    var data = new UserExperience()
+                    {
+                        Id = experience.Id,
+                        Company = experience.Company,
+                        Position = experience.Position,
+                        Responsibilities = experience.Responsibilities,
+                        UserId = id,
+                        Start = experience.Start,
+                        End = experience.End,
+
+                    };
+                    await _userExperienceRepository.Delete(data);
+
+                    return Json(new { Success = true, message = "deleted successfully" });
+
+                }
+                else
+                {
+                    return Json(new { Success = false, message = "Something went wrong" });
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                return Json(new { Success = false, message = "Something went wrong" });
+
+            }
+
+        }
+
+
 
         [HttpGet("getCertification")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "talent")]
+
+
         public async Task<IActionResult> getCertification()
         {
             //Your code here;
@@ -243,7 +557,27 @@ namespace Talent.Services.Profile.Controllers
         public async Task<ActionResult> UpdateProfilePhoto()
         {
             //Your code here;
-            throw new NotImplementedException();
+           
+            try
+            {
+                var postedFile = Request.Form.Files[0];
+
+                //IFormFile file = Request.Form.Files[0];
+                var id = _userAppContext.CurrentUserId;
+                var result = await _profileService.UpdateTalentPhoto( id,postedFile );
+
+
+                return Json(new { Success = true });
+            }
+            catch (Exception e)
+            {
+                return Json(new { Success = false, message = e });
+            }
+
+
+
+
+            
         }
 
         [HttpPost("updateTalentCV")]
@@ -251,8 +585,16 @@ namespace Talent.Services.Profile.Controllers
         public async Task<ActionResult> UpdateTalentCV()
         {
             IFormFile file = Request.Form.Files[0];
-            //Your code here;
-            throw new NotImplementedException();
+            try
+            {
+                
+
+                return Json(new { Success = true });
+            }
+            catch (Exception e)
+            {
+                return Json(new { Success = false, message = e });
+            }
         }
 
         [HttpPost("updateTalentVideo")]
@@ -438,9 +780,46 @@ namespace Talent.Services.Profile.Controllers
         {
             try
             {
-                var result = (await _profileService.GetTalentSnapshotList(_userAppContext.CurrentUserId, false, feed.Position, feed.Number)).ToList();
+              // var result = (await _profileService.GetTalentSnapshotList(_userAppContext.CurrentUserId, false, feed.Position, feed.Number)).ToList();
 
-                // Dummy talent to fill out the list once we run out of data
+
+
+
+
+                var data = _userRepository.Collection;
+                var dt = _userExperienceRepository.Collection;
+                var sk = _userSkillRepository.GetQueryable().Select(s => s.Skill).Take(5).ToList();
+
+
+                var talentSnapShot = (from u in data.AsQueryable()
+                                          
+                                      join e in dt.AsQueryable()
+                                      on u.Id equals e.UserId
+                                      where u.VisaStatus != null
+
+                                      select new TalentSnapshotViewModel
+                                      {
+                                          Id = u.Id,
+                                          Name = u.FirstName,
+                                          VideoUrl = u.VideoName,
+                                          PhotoId = u.ProfilePhotoUrl,
+                                          Visa = u.VisaStatus,
+                                          CurrentEmployment = e.Company,
+                                          Level=e.Position,
+                                          Skills = sk,
+
+                                      }).ToList();
+
+                var groupedResult = talentSnapShot.GroupBy(s => s.Id);
+
+
+
+
+
+
+
+
+                //Dummy talent to fill out the list once we run out of data
                 //if (result.Count == 0)
                 //{
                 //    result.Add(
@@ -456,7 +835,7 @@ namespace Talent.Services.Profile.Controllers
                 //            }
                 //        );
                 //}
-                return Json(new { Success = true, Data = result });
+                return Json(new { Success = true, Data = groupedResult });
             }
             catch (Exception e)
             {

@@ -42,7 +42,8 @@ export default class ResetPassword extends React.Component {
             Email: email,
             Token: token
         }
-        let url = `http://localhost:60998/authentication/authentication/verifyResetPasswordToken?o=${email}&p=${token}`;
+        let url = `https://talentproject2.azurewebsites.net/authentication/authentication/verifyResetPasswordToken?o=${email}&p=${token}`;
+       // let url = `http://localhost:60998/authentication/authentication/verifyResetPasswordToken?o=${email}&p=${token}`;
         $.ajax({
             url: url,
             type: 'POST',

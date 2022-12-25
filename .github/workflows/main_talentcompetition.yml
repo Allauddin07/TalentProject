@@ -19,7 +19,11 @@ jobs:
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v1
         with:
+<<<<<<< HEAD
           dotnet-version: '2.0.0'
+=======
+          dotnet-version: '2.x.x'
+>>>>>>> 86338a83f3bc4b1910d604da7a0d00b6965d665c
           include-prerelease: true
 
       - name: Build with dotnet
@@ -53,5 +57,5 @@ jobs:
         with:
           app-name: 'TalentCompetition'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_B6E48C8A7E11494FB421B4476028C3E7 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_A8478E3B18D94100BE3F833FBC73E01A }}
           package: .

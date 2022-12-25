@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Talent.Common.Models;
 
 namespace Talent.Services.Profile.Models
 {

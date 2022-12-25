@@ -1,4 +1,5 @@
-﻿using Talent.Common.Auth;
+﻿
+using Talent.Common.Auth;
 using Talent.Common.Contracts;
 using Talent.Common.Models;
 using MongoDB.Bson;
